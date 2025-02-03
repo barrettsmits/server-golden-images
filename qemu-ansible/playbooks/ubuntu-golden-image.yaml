@@ -13,8 +13,8 @@
 
   tasks:
     - include_role:
-        name: cloud_init
-        tasks_from: localhost-tasks.yml
+        name: ubuntu_init
+        tasks_from: ../roles/ubuntu_init/tasks/localhost-tasks.yml
   tags:
     - download
 
@@ -41,8 +41,8 @@
     cloud_init_template_vmid: 9999
   tasks:
     - include_role:
-        name: cloud_init
-        tasks_from: proxmox-tasks.yml
+        name: proxmox
+        tasks_from: ../roles/proxmox/tasks/proxmox-tasks.yml
   tags:
     - create
 

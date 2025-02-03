@@ -1,0 +1,41 @@
+---
+# defaults file for cloud_init
+
+# Connection settings
+arch_init_api_host: "{{ var_api_host }}"
+arch_init_api_user: "{{ var_api_user }}"
+arch_init_api_token_id: "{{ vault_api_token_id }}"
+arch_init_api_token_secret: "{{ vault_api_token_secret }}"
+arch_init_force_download: false  
+arch_init_public_keys: "{{ vault_ssh_pubkey }}"
+arch_init_ci_password: "{{ vault_ci_password }}"
+arch_init_node: proxmox
+
+# Image settings
+arch_init_img_target_path: /tmp
+arch_init_img_version: noble
+arch_init_version_number: 24.04.1
+arch_init_img_target_name: "{{ arch_init_img_version }}-server-cloudimg-amd64"
+arch_init_img_source_url: "https://cloud-images.ubuntu.com/{{ arch_init_img_version }}/current/{{ arch_init_img_target_name }}.img"
+arch_init_img_file_path: /tmp
+arch_init_img_file_name: "{{ arch_init_img_version }}-archlinux-{{ arch_init_version_number }}"
+
+# Remote settings
+arch_init_remote_user: root
+arch_init_img_remote_path: /tmp
+  
+# VM settings
+arch_init_user_data_file: vendor.yaml
+arch_init_storage_target: LVM-Prime
+arch_init_disksize: 20G
+arch_init_nameservers:
+  - 192.168.1.50
+  - 8.8.8.8
+  - 8.8.4.4
+arch_init_template_vmid: 9999
+arch_init_template_name: "golden-image-archlinux-{{ arch_init_version_number }}"
+
+# Cloud-init User
+arch_init_ciuser: ansibleadmin
+arch_init_cipassword: '{{ vault_proxmox_userlist.users[arch_init_ciuser].password }}'
+arch_init_sshkeys: '{{ vault_proxmox_userlist.users[arch_init_ciuser].ssh_key }}'

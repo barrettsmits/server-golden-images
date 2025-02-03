@@ -1,0 +1,88 @@
+---
+# Copy downloaded image from localhost to host
+- name: Copy downloaded image to proxmox
+  ansible.builtin.copy:
+    src: "{{ cloud_init_img_file_path }}/{{ cloud_init_img_file_name }}.img"
+    dest: "{{ cloud_init_img_remote_path }}/{{ cloud_init_img_file_name }}.img"
+    mode: "0777"
+    force: true
+
+- name: Copy vendor.yaml file to host
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/roles/cloud_init/files/{{ cloud_init_user_data_file }}"
+    dest: "/var/lib/vz/snippets/{{ cloud_init_user_data_file }}"
+    mode: "0777"
+    force: true
+
+# Control Proxmox remotely with Ansible Community General proxmox_kvm
+- name: Remove existing golden image
+  community.general.proxmox_kvm:
+    node: "{{ cloud_init_node }}"
+    api_host: "{{ cloud_init_api_host }}"
+    api_user: "{{ cloud_init_api_user }}"
+    api_token_id: "{{ cloud_init_api_token_id }}"
+    api_token_secret: "{{ cloud_init_api_token_secret }}"
+    vmid: "{{ cloud_init_template_vmid }}"
+    state: absent
+
+    
+- name: QM create and import disk
+  ansible.builtin.shell: |
+    cd /tmp/
+    qm create {{ cloud_init_template_vmid }} --memory 2048 --net0 virtio,bridge=vmbr0 
+    qm importdisk {{ cloud_init_template_vmid }} {{ cloud_init_img_file_name }}.img {{ cloud_init_storage_target }}
+  register: import_result
+
+- name: Wait for disk import to complete
+  ansible.builtin.wait_for:
+    timeout: 10
+
+- name: Attach imported disk to VM
+  ansible.builtin.shell: |
+    qm set {{ cloud_init_template_vmid }} --scsihw virtio-scsi-pci --scsi0 {{ cloud_init_storage_target }}:vm-{{ cloud_init_template_vmid }}-disk-0
+    qm set {{ cloud_init_template_vmid }} --ide2 local-lvm:cloudinit
+
+- name: Wait for disk attachment
+  ansible.builtin.wait_for:
+    timeout: 5
+
+- name: Configure VM settings
+  community.general.proxmox_kvm:
+    node: "{{ cloud_init_node }}"
+    api_host: "{{ cloud_init_api_host }}"
+    api_user: "{{ cloud_init_api_user }}"
+    api_token_id: "{{ cloud_init_api_token_id }}"
+    api_token_secret: "{{ cloud_init_api_token_secret }}"
+    vmid: "{{ cloud_init_template_vmid }}"
+    name: "{{ cloud_init_template_name }}"
+    scsihw: 'virtio-scsi-pci'
+    scsi:
+      scsi0: '{{ cloud_init_storage_target }}:vm-{{ cloud_init_template_vmid }}-disk-0,size={{ cloud_init_disksize }}'
+    net:
+      net0: 'virtio,bridge=vmbr0,firewall=1'
+    ipconfig:
+      ipconfig0: 'ip=dhcp'
+    nameservers: "{{ cloud_init_nameservers }}"
+    boot: 'order=scsi0'
+    vga: 'std'
+    agent: 'enabled=1,fstrim_cloned_disks=1'
+    ciuser: '{{ cloud_init_ciuser }}'
+    cipassword: '{{ cloud_init_cipassword }}'
+    sshkeys: '{{ cloud_init_sshkeys }}'
+    cicustom: "vendor=local:snippets/vendor.yaml"
+    update: true
+
+- name: 3 second pause
+  ansible.builtin.pause:
+    seconds: 3
+
+- name: Convert to template
+  ansible.builtin.command:
+    cmd: qm template {{ cloud_init_template_vmid }}
+  register: my_output
+  changed_when: my_output.rc != 0
+
+- name: Wait for server to update
+  ansible.builtin.wait_for:
+    timeout: 10
+
