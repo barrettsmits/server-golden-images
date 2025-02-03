@@ -1,0 +1,27 @@
+#cloud-config
+ssh_pwauth: true
+preserve_hostname: true
+prefer_fqdn_over_hostname: false
+timezone: Asia/Kolkata
+
+users:
+  - default
+  - name: {{ ci_user_name }}
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - {{ ssh_public_key }}
+    lock_passwd: false
+    passwd: {{ ci_user_password_hash }}
+
+packages:
+  - qemu-guest-agent
+  - vim
+  - sudo
+  - gnupg
+  - git
+
+runcmd:
+  - [ systemctl, daemon-reload ]
+  - [ systemctl, enable, qemu-guest-agent ]
+  - [ systemctl, start, --no-block, qemu-guest-agent ]
