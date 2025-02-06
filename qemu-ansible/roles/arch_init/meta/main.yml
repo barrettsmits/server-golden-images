@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Barrett Smits
-  description: Initiates cloud init image for Proxmox default template
+  description: Initiates cloud init image for Arch Linux.
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value

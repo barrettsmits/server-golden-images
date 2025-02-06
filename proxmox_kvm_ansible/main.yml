@@ -1,5 +1,5 @@
 ---
-- name: download multiple cloud images
+- name: Download multiple cloud images
   hosts: proxmox_prd
   gather_facts: false
   vars_files:
@@ -10,7 +10,7 @@
     - name: Get iso storage directory
       community.general.proxmox_storage_info:
         api_host: "{{ pve_api_host }}"
-        api_user: "{{pve_iaac_name}}@pve"
+        api_user: "{{pve_iaac_name}}@pam"
         api_password: "{{ pve_iaac_password }}"
         storage: "{{ pve_iso_storage }}"
       register: iso_store
@@ -22,7 +22,7 @@
     - name: Get snippets storage directory
       community.general.proxmox_storage_info:
         api_host: "{{ pve_api_host }}"
-        api_user: "{{pve_iaac_name}}@pve"
+        api_user: "{{pve_iaac_name}}@pam"
         api_password: "{{ pve_iaac_password }}"
         storage: "{{ pve_snippets_storage }}"
       register: snippets_store
@@ -51,7 +51,7 @@
     - name: Create vm for tempalte
       community.general.proxmox_kvm:
         api_host: "{{ pve_api_host }}"
-        api_user: "{{ pve_iaac_name }}@pve"
+        api_user: "{{ pve_iaac_name }}@pam"
         api_password: "{{ pve_iaac_password }}"
         node: "{{ node }}"
         vmid: "{{ item.value.vmid }}"
@@ -65,7 +65,7 @@
           net0: virtio,bridge=vmbr0
         ipconfig:
           ipconfig0: ip=dhcp
-        cicustom: "user={{ pve_snippets_storage }}:snippets/default_cloudconfig.yml"
+        cicustom: "vendor={{ pve_snippets_storage }}:snippets/default_cloudconfig.yml"
         agent: true
         ostype: l26
         scsihw: virtio-scsi-pci
@@ -84,10 +84,11 @@
         api_password: "{{ pve_root_password }}"
         vmid: "{{ item.value.vmid }}"
         import_from: "{{ pve_iso_dir }}/{{ item.value.iso_url | basename | splitext | first }}.img"
-        format: qcow2
+        format: "{{ disk_format }}"
         disk: virtio0
         storage: "{{ pve_template_storage }}"
         state: present
+        timeout: 60 # 1 minute
       loop: "{{ templates | dict2items }}"
       loop_control:
         label: "{{ item.key }}"

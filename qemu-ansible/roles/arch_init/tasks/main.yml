@@ -1,0 +1,31 @@
+---
+# Local Host Tasks
+- name: Register if a recent Cloud-init image exists
+  ansible.builtin.find:
+    paths: "{{ arch_init_img_target_path }}/"
+    pattern: "{{ arch_init_img_file_name }}.img"
+    age: -7d
+  register: file_data
+
+- name: If the downloaded image is older than 7 days, redownload it
+  when: not file_data.files | length > 0 or arch_init_force_download
+  block:
+    - name: Download cloud image
+      ansible.builtin.get_url:
+        url: "{{ arch_init_img_source_url }}"
+        dest: "{{ arch_init_img_target_path }}"
+        mode: "0655"
+
+    - name: Virt-customize the image
+      ansible.builtin.shell: |
+        cd {{ arch_init_img_target_path }}
+        sudo virt-customize -a {{ arch_init_img_target_name }}.img --install qemu-guest-agent
+        sudo virt-customize -a {{ arch_init_img_target_name }}.img --install python3
+        sudo virt-customize -a {{ arch_init_img_target_name }}.img --run-command 'systemctl enable qemu-guest-agent'
+        sudo virt-customize -a {{ arch_init_img_target_name }}.img --run-command 'systemctl stop qemu-guest-agent'
+        sudo virt-customize -a {{ arch_init_img_target_name }}.img --root-password password:ubuntu
+      become: true
+
+    - name: Rename the image file
+      ansible.builtin.shell: |
+        mv {{ arch_init_img_target_path }}/{{ arch_init_img_target_name }}.img {{ arch_init_img_file_path }}/{{ arch_init_img_file_name }}.img

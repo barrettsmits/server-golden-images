@@ -1,5 +1,5 @@
 ---
-- name: Download current Ubuntu Cloud Image
+- name: Download Cloud Images
   hosts: localhost
   gather_facts: true
   become_user: bsmits
@@ -7,16 +7,27 @@
     - ~/secrets/creds.yml
   vars:
     ansible_become_pass: "{{ become_password }}"
-    cloud_init_force_download: false
-    cloud_init_img_download_version: noble
-    cloud_init_template_name: golden-ubuntu-24.04.1
-
+    cloud_init_force_download: true
+    # Ubuntu specific vars
+    ubuntu_cloud_init_img_download_version: noble
+    ubuntu_cloud_init_template_name: golden-ubuntu-24.04.1
+    # Arch specific vars
+    arch_cloud_init_template_name: golden-arch-latest
+  roles:
+  - ubuntu_init
+  - arch_init
   tasks:
     - include_role:
         name: ubuntu_init
-        tasks_from: ../roles/ubuntu_init/tasks/localhost-tasks.yml
-  tags:
-    - download
+      tags:
+        - download
+        - ubuntu
+
+    - include_role:
+        name: arch_init
+      tags:
+        - download
+        - arch
 
 - name: Proxmox tasks
   hosts: proxmox_prd
@@ -30,19 +41,33 @@
     var_api_user: root@pam
     var_api_token_id: "{{ vault_api_token_id }}"
     var_api_token_secret: "{{ vault_api_token_secret }}"
-    cloud_init_template_name: golden-ubuntu-24.04.1
-    
-    # Cloud-init User
-    cloud_init_ciuser: ansibleadmin # Change this to match the ansible admin user in the vault.
-    
-    # VM setttings   
-    cloud_init_storage_target: LVM-Prime # Change this to match existing storage on Proxmox.
+    cloud_init_ciuser: ansibleadmin
+    cloud_init_storage_target: LVM-Prime
     cloud_init_disksize: 20G
-    cloud_init_template_vmid: 9999
+    
+    # Define the template names here
+    ubuntu_cloud_init_template_name: golden-ubuntu-24.04.1
+    arch_cloud_init_template_name: golden-arch-latest
+    
+    # OS-specific settings
+    os_settings:
+      ubuntu:
+        template_name: "{{ ubuntu_cloud_init_template_name }}"
+        vmid: 9999
+      arch:
+        template_name: "{{ arch_cloud_init_template_name }}"
+        vmid: 9998
+    
+    # Set active OS based on tags
+    active_os: "{{ 'arch' if 'arch' in ansible_run_tags else 'ubuntu' }}"
+    
+    # Use the active OS settings
+    cloud_init_template_name: "{{ os_settings[active_os].template_name }}"
+    cloud_init_template_vmid: "{{ os_settings[active_os].vmid }}"
+  
   tasks:
     - include_role:
         name: proxmox
-        tasks_from: ../roles/proxmox/tasks/proxmox-tasks.yml
   tags:
     - create
 

@@ -19,11 +19,11 @@
     - name: Virt-customize the image
       ansible.builtin.shell: |
         cd {{ cloud_init_img_target_path }}
-        sudo virt-customize -a {{ cloud_init_img_target_name }}.img --install qemu-guest-agent
-        sudo virt-customize -a {{ cloud_init_img_target_name }}.img --install python3
-        sudo virt-customize -a {{ cloud_init_img_target_name }}.img --run-command 'systemctl enable qemu-guest-agent'
-        sudo virt-customize -a {{ cloud_init_img_target_name }}.img --run-command 'systemctl stop qemu-guest-agent'
-        sudo virt-customize -a {{ cloud_init_img_target_name }}.img --root-password password:ubuntu
+        virt-customize -a {{ cloud_init_img_target_name }}.img --install qemu-guest-agent
+        virt-customize -a {{ cloud_init_img_target_name }}.img --install python3
+        virt-customize -a {{ cloud_init_img_target_name }}.img --run-command 'systemctl enable qemu-guest-agent'
+        virt-customize -a {{ cloud_init_img_target_name }}.img --run-command 'systemctl stop qemu-guest-agent'
+        virt-customize -a {{ cloud_init_img_target_name }}.img --root-password password:ubuntu
       become: true
 
     - name: Rename the image file

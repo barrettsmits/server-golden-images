@@ -9,7 +9,7 @@
 
 - name: Copy vendor.yaml file to host
   ansible.builtin.copy:
-    src: "{{ playbook_dir }}/roles/cloud_init/files/{{ cloud_init_user_data_file }}"
+    src: "{{ playbook_dir }}/roles/proxmox/files/{{ cloud_init_user_data_file }}"
     dest: "/var/lib/vz/snippets/{{ cloud_init_user_data_file }}"
     mode: "0777"
     force: true
@@ -22,7 +22,7 @@
     api_user: "{{ cloud_init_api_user }}"
     api_token_id: "{{ cloud_init_api_token_id }}"
     api_token_secret: "{{ cloud_init_api_token_secret }}"
-    vmid: "{{ cloud_init_template_vmid }}"
+    vmid: "{{ os_settings[active_os].vmid }}"
     state: absent
 
     

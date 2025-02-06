@@ -16,7 +16,7 @@ arch_init_img_target_path: /tmp
 arch_init_img_version: noble
 arch_init_version_number: 24.04.1
 arch_init_img_target_name: "{{ arch_init_img_version }}-server-cloudimg-amd64"
-arch_init_img_source_url: "https://cloud-images.ubuntu.com/{{ arch_init_img_version }}/current/{{ arch_init_img_target_name }}.img"
+arch_init_img_source_url: "https://cloud-images.ubuntu.com/{{ arch_init_img_version }}/current/{{ arch_init_img_target_name }}.img" #https://gitlab.archlinux.org/archlinux/arch-boxes/-/package_files/8625/download
 arch_init_img_file_path: /tmp
 arch_init_img_file_name: "{{ arch_init_img_version }}-archlinux-{{ arch_init_version_number }}"
 
