@@ -20,6 +20,12 @@ packages:
   - sudo
   - gnupg
   - git
+  - net-tools                   # Collection of basic networking tools
+  - iotop                       # Simple top-like I/O monitor
+  - iftop                       # Display bandwidth usage on an interface
+  - ncdu                        # NCurses disk usage viewer
+  - tree                        # Display directory structure in tree format
+  - unzip                       # De-archiver for .zip files
 
 runcmd:
   - [ systemctl, daemon-reload ]
