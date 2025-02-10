@@ -56,6 +56,16 @@ pve_root_name: root
 pve_root_password: "Root password for Proxmox host"
 
 ```
+### Additional Variables
+
+```
+# Proxmox Storage Variables
+pve_iso_storage: "Storage for ISO files"
+pve_snippets_storage: "Storage for snippets"
+pve_template_storage: "Storage for templates" 
+
+``` 
+
 
 ## Features
 

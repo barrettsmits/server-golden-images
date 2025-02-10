@@ -1,17 +1,12 @@
 ---
-# pve_iaac_name: username # in secrets.yml
-#pve_api_host: ###.###.###.### or URL   # in secrets.yml
-#node: node name # in secrets.yml
-
+# Proxmox Storage Variables
 pve_iso_storage: local
 pve_snippets_storage: local
 pve_template_storage: LVM-Prime
-
-#ci_user_name: in secrets.yml
-#ci_user_password_hash: #mkpasswd --method=SHA-512 --rounds=4096mkpasswd --method=SHA-512 --rounds=4096
-
 disk_format: raw
 
+
+# Template Variables 
 templates:
   debian:
     vmid: 9001
