@@ -4,8 +4,9 @@
   hosts: proxmox_prd
   gather_facts: true
   vars_files:
-    - vars.yml
-    - secrets.yml
+    - vars/vars.yml
+    - secrets/secrets.yml
+    - ~/secrets/creds.yml
   tasks:
     - name: Include main tasks
       ansible.builtin.include_tasks:
