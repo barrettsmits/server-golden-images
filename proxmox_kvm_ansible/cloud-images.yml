@@ -6,7 +6,7 @@
   vars_files:
     - vars/vars.yml
     - secrets/secrets.yml
-    - ~/secrets/creds.yml
+    - ~/secrets/creds.yml  #vault file (pulls into secrets.yml)
   tasks:
     - name: Include main tasks
       ansible.builtin.include_tasks:
