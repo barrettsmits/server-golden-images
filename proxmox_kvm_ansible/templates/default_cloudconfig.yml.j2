@@ -1,0 +1,33 @@
+#cloud-config
+ssh_pwauth: true
+preserve_hostname: true
+prefer_fqdn_over_hostname: false
+timezone: America/Chicago
+
+users:
+  - default
+  - name: {{ ci_user_name }}
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - {{ ssh_public_key }}
+    lock_passwd: false
+    passwd: {{ ci_user_password_hash }}
+
+packages:
+  - qemu-guest-agent
+  - vim
+  - sudo
+  - gnupg
+  - git
+  - net-tools                   # Collection of basic networking tools
+  - iotop                       # Simple top-like I/O monitor
+  - iftop                       # Display bandwidth usage on an interface
+  - ncdu                        # NCurses disk usage viewer
+  - tree                        # Display directory structure in tree format
+  - unzip                       # De-archiver for .zip files
+
+runcmd:
+  - [ systemctl, daemon-reload ]
+  - [ systemctl, enable, qemu-guest-agent ]
+  - [ systemctl, start, --no-block, qemu-guest-agent ]
