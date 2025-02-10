@@ -1,0 +1,13 @@
+---
+
+- name: Download multiple cloud images, and create templates in Proxmox
+  hosts: proxmox_prd
+  gather_facts: true
+  vars_files:
+    - vars.yml
+    - secrets.yml
+  tasks:
+    - name: Include main tasks
+      ansible.builtin.include_tasks:
+        file: tasks/main.yml 
+    
