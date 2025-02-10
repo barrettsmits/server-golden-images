@@ -26,7 +26,6 @@
   ansible.builtin.set_fact:
     pve_snippets_dir: "{{ snippets_store.proxmox_storages[0].path}}/snippets"
 
-
 - name: Download cloud images
   ansible.builtin.get_url:
     url: "{{ item.value.iso_url }}"
@@ -76,7 +75,7 @@
 - name: Import images to disk
   community.general.proxmox_disk:
     api_host: "{{ pve_api_host }}"
-    api_user: "{{ pve_root_name }}@pam"
+    api_user: "{{ pve_root_name }}@pam" # The root account is needed here for import, testing other options.
     api_password: "{{ pve_root_password }}"
     vmid: "{{ item.value.vmid }}"
     import_from: "{{ pve_iso_dir }}/{{ item.value.iso_url | basename | splitext | first }}.img"
