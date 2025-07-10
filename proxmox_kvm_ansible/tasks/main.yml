@@ -37,6 +37,12 @@
   loop_control:
     label: "{{ item.key }}"
 
+- name: Ensure snippets directory exists
+  ansible.builtin.file:
+    path: "{{ pve_snippets_dir }}"
+    state: directory
+    mode: '0755'
+
 - name: Create default cloudinit config
   ansible.builtin.template:
     src: default_cloudconfig.yml.j2
@@ -83,7 +89,7 @@
     disk: virtio0
     storage: "{{ pve_template_storage }}"
     state: present
-    timeout: 60 # 1 minute
+    timeout: 600 # 5 minutes
   loop: "{{ templates | dict2items }}"
   loop_control:
     label: "{{ item.key }}"

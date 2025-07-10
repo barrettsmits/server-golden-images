@@ -2,7 +2,7 @@
 # Proxmox Storage Variables
 pve_iso_storage: local
 pve_snippets_storage: local
-pve_template_storage: LVM-Prime
+pve_template_storage: local-lvm
 disk_format: raw
 
 
